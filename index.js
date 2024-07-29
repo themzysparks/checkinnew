@@ -88,7 +88,7 @@ async function syncFiles() {
         // Copy local file contents to the remote file
         fs.copyFileSync(LOCAL_FILE_PATH, LOCAL_FILE_PATH_2);
         // fs.copyFileSync(LOCAL_FILE_PATH + '.temp', LOCAL_FILE_PATH);
-        // fs.unlinkSync(LOCAL_FILE_PATH + '.temp');
+        // fs.unlinkSync(LOCAL_FILE_PATH_2);
         
         await uploadFile();    // Upload the updated file back to the remote server
     } catch (err) {
