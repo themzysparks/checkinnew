@@ -38,70 +38,70 @@ let db = new sqlite3.Database('./database.db', (err) => {
 const FTP_HOST = process.env.FTP_HOST;
 const FTP_USER = process.env.FTP_USER;
 const FTP_PASS = process.env.FTP_PASS;
-const REMOTE_FILE_PATH = './checkin_remotedb/remotedb.db';
-const LOCAL_FILE_PATH = './database.db';
-const LOCAL_FILE_PATH_2 = './remotedb.db';
+// const REMOTE_FILE_PATH = './checkin_remotedb/remotedb.db';
+// const LOCAL_FILE_PATH = './database.db';
+// const LOCAL_FILE_PATH_2 = './remotedb.db';
 
-// Function to download the remote file
-async function downloadFile() {
-    const client = new ftp.Client();
-    try {
-        await client.access({
-            host: FTP_HOST,
-            user: FTP_USER,
-            password: FTP_PASS,
-            secure: false
-        });
-        await client.downloadTo(LOCAL_FILE_PATH_2, REMOTE_FILE_PATH);
-        console.log('Remote file downloaded successfully.');
-    } catch (err) {
-        console.error('Download failed:', err);
-    } finally {
-        client.close();
-    }
-}
+// // Function to download the remote file
+// async function downloadFile() {
+//     const client = new ftp.Client();
+//     try {
+//         await client.access({
+//             host: FTP_HOST,
+//             user: FTP_USER,
+//             password: FTP_PASS,
+//             secure: false
+//         });
+//         await client.downloadTo(LOCAL_FILE_PATH_2, REMOTE_FILE_PATH);
+//         console.log('Remote file downloaded successfully.');
+//     } catch (err) {
+//         console.error('Download failed:', err);
+//     } finally {
+//         client.close();
+//     }
+// }
 
-// Function to upload the file to the remote server
-async function uploadFile() {
-    const client = new ftp.Client();
-    try {
-        await client.access({
-            host: FTP_HOST,
-            user: FTP_USER,
-            password: FTP_PASS,
-            secure: false
-        });
-        await client.uploadFrom(LOCAL_FILE_PATH_2, REMOTE_FILE_PATH);
-        console.log('Updated file uploaded successfully.');
-    } catch (err) {
-        console.error('Upload failed:', err);
-    } finally {
-        client.close();
-    }
-}
+// // Function to upload the file to the remote server
+// async function uploadFile() {
+//     const client = new ftp.Client();
+//     try {
+//         await client.access({
+//             host: FTP_HOST,
+//             user: FTP_USER,
+//             password: FTP_PASS,
+//             secure: false
+//         });
+//         await client.uploadFrom(LOCAL_FILE_PATH_2, REMOTE_FILE_PATH);
+//         console.log('Updated file uploaded successfully.');
+//     } catch (err) {
+//         console.error('Upload failed:', err);
+//     } finally {
+//         client.close();
+//     }
+// }
 
-// Function to synchronize files
+// Paths
+const LOCAL_FILE_PATH = './database.db';      // Main database file
+const LOCAL_BACKUP_PATH = './remotedb.db';    // Backup in root folder
+
+// Function to create a local backup
 async function syncFiles() {
     try {
-        await downloadFile();  // Download the latest remote file
-        
-        // Copy local file contents to the remote file
-        fs.copyFileSync(LOCAL_FILE_PATH, LOCAL_FILE_PATH_2);
-        // fs.copyFileSync(LOCAL_FILE_PATH + '.temp', LOCAL_FILE_PATH);
-        // fs.unlinkSync(LOCAL_FILE_PATH_2);
-        
-        await uploadFile();    // Upload the updated file back to the remote server
+        // Copy database file to the backup location
+        fs.copyFileSync(LOCAL_FILE_PATH, LOCAL_BACKUP_PATH);
+        console.log(`Backup created at: ${LOCAL_BACKUP_PATH}`);
     } catch (err) {
         console.error('Sync failed:', err);
     }
 }
 
-// Sync every 5 hours
-const syncJob = new cron.CronJob('*/30 * * * *', syncFiles);  // Runs every 30 mins
+// Sync every 30 minutes
+const syncJob = new cron.CronJob('*/30 * * * *', syncFiles);
 syncJob.start();
 
 // Run the sync process immediately on startup
 syncFiles();
+
 
 
 // Initialize MongoDB and SQLite connections here if needed
